@@ -115,8 +115,23 @@ export default function App() {
   };
 
   // Handle Profile Save
-  const handleProfileSave = (updatedUser: UserProfile) => {
+// Handle Profile Save
+  const handleProfileSave = async (updatedUser: UserProfile) => {
     setCurrentUser(updatedUser);
+    
+    try {
+      const backendUrl = import.meta.env.VITE_APP_URL || 'https://college-culture.onrender.com';
+      await fetch(`${backendUrl}/api/profile`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedUser),
+      });
+    } catch (error) {
+      console.error('Failed to sync with backend:', error);
+    }
+
     setCurrentView('home');
   };
 
