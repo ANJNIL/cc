@@ -105,7 +105,7 @@ export default function App() {
 
     try {
       const backendUrl = import.meta.env.VITE_APP_URL || 'https://college-culture.onrender.com';
-      await fetch(`${backendUrl}/api/login`, {
+      await fetch(`${backendUrl}/api/auth/login`,  {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
