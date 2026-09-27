@@ -24,7 +24,6 @@ import {
 } from './mockData';
 
 export default function App() {
-  // Load saved state or use initial defaults
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     const saved = localStorage.getItem('collegeculture_user');
     if (saved) {
@@ -34,7 +33,7 @@ export default function App() {
         // fallback
       }
     }
-    return null; // Start at LoginView to demonstrate the complete requested flow!
+    return null;
   });
 
   const [currentView, setCurrentView] = useState<string>('login');
@@ -59,7 +58,6 @@ export default function App() {
     return INITIAL_STORIES;
   });
 
-  // Hackathon and Team Management States
   const [hackathons, setHackathons] = useState<HackathonItem[]>(UPCOMING_HACKATHONS);
   const [registeredHackathonIds, setRegisteredHackathonIds] = useState<string[]>(['hack_google_ai']);
   const [teams, setTeams] = useState<HackathonTeam[]>(() => {
@@ -77,7 +75,6 @@ export default function App() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [searchFilter, setSearchFilter] = useState('');
 
-  // Synchronize localStorage
   useEffect(() => {
     if (currentUser) {
       localStorage.setItem('collegeculture_user', JSON.stringify(currentUser));
@@ -99,18 +96,20 @@ export default function App() {
   }, [teams]);
 
   // Handle Login
- // Handle Login
   const handleLoginSuccess = async (user: UserProfile, isNewUser?: boolean) => {
     setCurrentUser(user);
 
     try {
       const backendUrl = import.meta.env.VITE_APP_URL || 'https://college-culture.onrender.com';
-      await fetch(`${backendUrl}/api/auth/login`,  {
+      await fetch(`${backendUrl}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(user),
+        body: JSON.stringify({
+          email: user.email,
+          password: (user as any).password || 'google_auth_default'
+        }),
       });
     } catch (error) {
       console.error('Failed to trigger login email:', error);
@@ -130,7 +129,6 @@ export default function App() {
   };
 
   // Handle Profile Save
-// Handle Profile Save
   const handleProfileSave = async (updatedUser: UserProfile) => {
     setCurrentUser(updatedUser);
     
@@ -150,7 +148,6 @@ export default function App() {
     setCurrentView('home');
   };
 
-  // Quick switch for reviewing screens directly
   const handleQuickDemoDevansh = () => {
     setCurrentUser(INITIAL_USER);
     setCurrentView('home');
@@ -164,34 +161,28 @@ export default function App() {
     setCurrentView('profile');
   };
 
-  // Add new post
   const handleAddPost = (newPost: Post) => {
     setPosts([newPost, ...posts]);
   };
 
-  // Add new story
   const handleAddStory = (newStory: Story) => {
     setStories([newStory, ...stories]);
   };
 
-  // Register for hackathon
   const handleRegisterHackathon = (hackathonId: string) => {
     if (!registeredHackathonIds.includes(hackathonId)) {
       setRegisteredHackathonIds([...registeredHackathonIds, hackathonId]);
     }
   };
 
-  // Start Generate Team Flow (Image 2)
   const handleStartCreateTeam = (hackathon: HackathonItem) => {
     setSelectedHackathonForTeam(hackathon);
     setCurrentView('create-team');
   };
 
-  // Team Created -> Open In-App Team Group Discussion Workspace
   const handleTeamCreated = (newTeam: HackathonTeam) => {
     setTeams([newTeam, ...teams]);
     setActiveTeamId(newTeam.id);
-    // Link hackathon to team
     setHackathons(
       hackathons.map((h) =>
         h.id === newTeam.hackathonId ? { ...h, isRegistered: true, userTeamId: newTeam.id } : h
@@ -203,16 +194,13 @@ export default function App() {
     setCurrentView('team-workspace');
   };
 
-  // Open team workspace from hackathon detail
   const handleOpenTeamWorkspace = (teamId: string) => {
     setActiveTeamId(teamId);
     setCurrentView('team-workspace');
   };
 
-  // Active Team for TeamWorkspaceView
   const currentActiveTeam = teams.find((t) => t.id === activeTeamId) || teams[0];
 
-  // Filter posts if search is active
   const displayedPosts = searchFilter
     ? posts.filter(
         (p) =>
@@ -222,11 +210,9 @@ export default function App() {
       )
     : posts;
 
-  // If user is not logged in or view is 'login', show Login View
   if (!currentUser || currentView === 'login') {
     return (
       <div className="relative">
-        {/* Quick Testing Bar top-right */}
         <div className="absolute top-3 right-4 z-30 flex items-center gap-2">
           <button
             onClick={handleQuickDemoDevansh}
@@ -255,7 +241,6 @@ export default function App() {
           : 'min-h-screen'
       }`}
     >
-      {/* Top Navigation Bar */}
       <Navbar
         currentUser={currentUser}
         currentView={currentView}
@@ -267,7 +252,6 @@ export default function App() {
         isSidebarOpen={isSidebarOpen}
       />
 
-      {/* Main Container */}
       <div
         className={`flex-1 max-w-[1440px] w-full mx-auto px-2 sm:px-4 lg:px-6 flex gap-4 sm:gap-6 relative min-h-0 ${
           currentView === 'team-workspace' || currentView === 'messages'
@@ -275,7 +259,6 @@ export default function App() {
             : ''
         }`}
       >
-        {/* Left Sidebar - persistent and slidable */}
         {currentView !== 'login' && (
           <Sidebar
             currentView={currentView}
@@ -291,7 +274,6 @@ export default function App() {
           />
         )}
 
-        {/* Dynamic Center Area based on current view - expands when sidebar is closed */}
         <main
           className={`flex-1 min-w-0 transition-all duration-300 h-full flex flex-col min-h-0 ${
             !isSidebarOpen ? 'w-full' : ''
@@ -323,7 +305,6 @@ export default function App() {
                 />
               </div>
 
-              {/* Distinct Separated Right-Side Section (Trending Techs, Suggested for You, Tech News) */}
               <div className="hidden xl:block w-80 lg:w-[340px] shrink-0 border-l border-slate-200/90 pl-6 sticky top-20 max-h-[calc(100vh-5.5rem)] overflow-y-auto overscroll-contain py-1 scrollbar-thin scrollbar-thumb-slate-200">
                 <RightSidebar
                   onSelectTag={(tag) => setSearchFilter(tag)}
@@ -419,7 +400,6 @@ export default function App() {
         </main>
       </div>
 
-      {/* Invite Friends Modal */}
       {showInviteModal && (
         <InviteModal onClose={() => setShowInviteModal(false)} />
       )}
