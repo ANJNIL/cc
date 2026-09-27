@@ -99,8 +99,23 @@ export default function App() {
   }, [teams]);
 
   // Handle Login
-  const handleLoginSuccess = (user: UserProfile, isNewUser?: boolean) => {
+ // Handle Login
+  const handleLoginSuccess = async (user: UserProfile, isNewUser?: boolean) => {
     setCurrentUser(user);
+
+    try {
+      const backendUrl = import.meta.env.VITE_APP_URL || 'https://college-culture.onrender.com';
+      await fetch(`${backendUrl}/api/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(user),
+      });
+    } catch (error) {
+      console.error('Failed to trigger login email:', error);
+    }
+
     if (isNewUser || !user.isProfileComplete) {
       setCurrentView('profile');
     } else {
